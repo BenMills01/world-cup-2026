@@ -9,8 +9,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        gold: {
+          300: '#f5d485',
+          400: '#e8b84b',
+          500: '#c9922a',
+          600: '#a87420',
+        },
+        pitch: '#1a3a2a',
       },
     },
   },

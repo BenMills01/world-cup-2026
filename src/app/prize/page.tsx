@@ -101,7 +101,7 @@ export default function PrizePage() {
 
       {/* Admin fee note */}
       <p className="text-center text-xs text-white/20">
-        £{ENTRY_FEE - POOL_PER_ENTRY} per entry covers admin costs · £{POOL_PER_ENTRY} per entry goes into the prize pool
+        £{ENTRY_FEE - POOL_PER_ENTRY} per entry goes to admin · £{POOL_PER_ENTRY} per entry goes into the prize pool
       </p>
 
       {lastRefresh && (

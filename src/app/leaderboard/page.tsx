@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { scoreAndRankEntries } from '@/lib/scoring'
 import { GROUP_LETTERS } from '@/lib/groups'
 import type { Entry, Standing, StandingsMap, ScoredEntry } from '@/lib/types'
+import Countdown from '@/components/Countdown'
 
 const REFRESH_INTERVAL = 60_000
 
@@ -186,6 +187,10 @@ export default function LeaderboardPage() {
           onClose={() => setSelected(null)}
         />
       )}
+      <div className="mx-auto max-w-md">
+        <Countdown />
+      </div>
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-4xl font-black uppercase tracking-tight text-white">Leaderboard</h1>

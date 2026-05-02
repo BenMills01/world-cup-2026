@@ -3,9 +3,13 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { scoreAndRankEntries } from '@/lib/scoring'
+import { GROUP_LETTERS } from '@/lib/groups'
 import type { Entry, Standing, StandingsMap, ScoredEntry } from '@/lib/types'
 
 const REFRESH_INTERVAL = 60_000
+
+const POS_LABELS = ['1st', '2nd', '3rd', '4th']
+const POS_KEYS = ['pos_1', 'pos_2', 'pos_3', 'pos_4'] as const
 
 function rankStyle(rank: number) {
   if (rank === 1) return 'bg-gold-400/10 border-gold-500/40'
@@ -21,16 +25,111 @@ function rankBadge(rank: number) {
   return <span className="font-medium text-white/30">{rank}</span>
 }
 
+function EntryModal({
+  entry,
+  rank,
+  standings,
+  onClose,
+}: {
+  entry: ScoredEntry
+  rank: number
+  standings: StandingsMap
+  onClose: () => void
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur sm:items-center"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-t-2xl border border-white/10 bg-gray-950 p-6 sm:rounded-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div>
+            <div className="mb-1 text-sm text-white/40">{rankBadge(rank)}</div>
+            <h2 className="text-2xl font-black uppercase tracking-tight text-white">{entry.name}</h2>
+            <div className="mt-1 flex items-center gap-3 text-sm">
+              <span className="rounded-full bg-gold-400/20 px-2.5 py-0.5 font-black text-gold-400">
+                {entry.score} pts
+              </span>
+              {entry.perfectGroups > 0 && (
+                <span className="text-white/50">✨ {entry.perfectGroups} perfect group{entry.perfectGroups > 1 ? 's' : ''}</span>
+              )}
+              <span className="text-white/40">⚽ {entry.top_scorer}</span>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="shrink-0 rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/40 hover:text-white transition"
+          >
+            Close
+          </button>
+        </div>
+
+        {/* Group grid */}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {GROUP_LETTERS.map((letter) => {
+            const s = standings[letter]
+            const l = letter.toLowerCase()
+            const picks = POS_KEYS.map((k, i) => ({
+              label: POS_LABELS[i],
+              pick: entry[`group_${l}_${i + 1}`] as string,
+              actual: s?.[k] ?? null,
+            }))
+            const allCorrect = s && picks.every((p) => p.pick === p.actual)
+
+            return (
+              <div
+                key={letter}
+                className={`rounded-xl border p-3 ${allCorrect ? 'border-gold-500/40 bg-gold-400/5' : 'border-white/10 bg-white/5'}`}
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-white/60">
+                    Group {letter}
+                  </span>
+                  {allCorrect && <span className="text-xs text-gold-400">✨ Perfect</span>}
+                </div>
+                <div className="space-y-1">
+                  {picks.map(({ label, pick, actual }) => {
+                    const correct = actual !== null && pick === actual
+                    const wrong = actual !== null && pick !== actual
+                    return (
+                      <div key={label} className="flex items-center gap-2 text-sm">
+                        <span className="w-6 text-xs text-white/30">{label}</span>
+                        <span className={`flex-1 font-medium ${correct ? 'text-green-400' : wrong ? 'text-red-400/70' : 'text-white'}`}>
+                          {pick}
+                        </span>
+                        {correct && <span className="text-xs text-green-400">✓</span>}
+                        {wrong && actual && (
+                          <span className="text-xs text-white/30">({actual})</span>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function tournamentStarted(standings: StandingsMap): boolean {
   return Object.values(standings).some((s) => s.pos_1 !== null)
 }
 
 export default function LeaderboardPage() {
   const [entries, setEntries] = useState<ScoredEntry[]>([])
+  const [standings, setStandings] = useState<StandingsMap>({})
   const [started, setStarted] = useState(false)
   const [loading, setLoading] = useState(true)
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const [search, setSearch] = useState('')
+  const [selected, setSelected] = useState<ScoredEntry | null>(null)
 
   const filtered = search.trim()
     ? entries.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()))
@@ -51,6 +150,7 @@ export default function LeaderboardPage() {
 
     const isStarted = tournamentStarted(standingsMap)
     setStarted(isStarted)
+    setStandings(standingsMap)
 
     const scored = scoreAndRankEntries(
       entriesRes.data as Entry[],
@@ -78,6 +178,14 @@ export default function LeaderboardPage() {
 
   return (
     <div className="space-y-6">
+      {selected && (
+        <EntryModal
+          entry={selected}
+          rank={entries.indexOf(selected) + 1}
+          standings={standings}
+          onClose={() => setSelected(null)}
+        />
+      )}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-4xl font-black uppercase tracking-tight text-white">Leaderboard</h1>
@@ -138,7 +246,8 @@ export default function LeaderboardPage() {
                   return (
                     <tr
                       key={entry.id}
-                      className={`border-b border-white/5 last:border-0 ${rankStyle(rank)}`}
+                      onClick={() => setSelected(entry)}
+                      className={`cursor-pointer border-b border-white/5 last:border-0 transition hover:brightness-125 ${rankStyle(rank)}`}
                     >
                       <td className="py-3 pl-4 pr-2">{rankBadge(rank)}</td>
                       <td className="px-3 py-3 font-bold text-white">{entry.name}</td>
@@ -170,7 +279,8 @@ export default function LeaderboardPage() {
               return (
                 <div
                   key={entry.id}
-                  className={`rounded-xl border p-4 ${rankStyle(rank)}`}
+                  onClick={() => setSelected(entry)}
+                  className={`cursor-pointer rounded-xl border p-4 transition hover:brightness-125 ${rankStyle(rank)}`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -203,7 +313,7 @@ export default function LeaderboardPage() {
           <span>✨ +3 bonus for a perfect group</span>
           <span>🏆 Max 84 pts</span>
           <span>🥇 70% · 🥈 25% · 🥉 5%</span>
-          <span>Tiebreaker 1: exact top scorer name match · Tiebreaker 2: whose pick scored more goals · Prize split if still tied</span>
+          <span>Tiebreaker 1: most perfect groups · Tiebreaker 2: exact top scorer match · Tiebreaker 3: whose pick scored more goals · Prize split if still tied</span>
         </div>
       </div>
     </div>

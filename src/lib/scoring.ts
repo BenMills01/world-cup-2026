@@ -46,9 +46,11 @@ export function scoreAndRankEntries(
 
   scored.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score
+    if (b.perfectGroups !== a.perfectGroups) return b.perfectGroups - a.perfectGroups
     const aExact = a.top_scorer === actualTopScorer ? 1 : 0
     const bExact = b.top_scorer === actualTopScorer ? 1 : 0
     return bExact - aExact
+    // tiebreaker 3 (whose top scorer scored more goals) requires manual adjudication
   })
 
   return scored

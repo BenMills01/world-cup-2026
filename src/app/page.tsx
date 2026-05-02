@@ -119,8 +119,9 @@ export default function EntryPage() {
             <span className="rounded bg-white/10 px-2 py-1 font-black text-white/40">🥉 5%</span>
           </div>
           <div className="mt-3 space-y-1 text-xs text-white/30">
-            <p><span className="text-white/50">Tiebreaker 1:</span> exact top scorer name match wins.</p>
-            <p><span className="text-white/50">Tiebreaker 2:</span> whoever&apos;s predicted top scorer scored more goals wins.</p>
+            <p><span className="text-white/50">Tiebreaker 1:</span> most perfect groups wins.</p>
+            <p><span className="text-white/50">Tiebreaker 2:</span> exact top scorer name match.</p>
+            <p><span className="text-white/50">Tiebreaker 3:</span> whose pick scored more goals.</p>
             <p>If still tied, the prize is split equally.</p>
           </div>
         </div>
@@ -180,8 +181,9 @@ export default function EntryPage() {
             <div className="rounded bg-white/10 px-2 py-1.5 text-center font-black text-white/40">🥉 5%</div>
           </div>
           <div className="mt-3 space-y-1 text-xs text-white/30">
-            <p><span className="text-white/50">Tiebreaker 1:</span> exact top scorer name match.</p>
-            <p><span className="text-white/50">Tiebreaker 2:</span> whose pick scored more goals.</p>
+            <p><span className="text-white/50">Tiebreaker 1:</span> most perfect groups wins.</p>
+            <p><span className="text-white/50">Tiebreaker 2:</span> exact top scorer name match.</p>
+            <p><span className="text-white/50">Tiebreaker 3:</span> whose pick scored more goals.</p>
             <p>Still tied? Prize is split equally.</p>
           </div>
         </div>

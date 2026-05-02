@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import GroupCard, { type GroupValues } from '@/components/GroupCard'
+import Countdown from '@/components/Countdown'
 import { GROUPS, GROUP_LETTERS } from '@/lib/groups'
 import { supabase } from '@/lib/supabase'
 
@@ -40,6 +41,7 @@ export default function EntryPage() {
   const [picks, setPicks] = useState<Picks>({})
   const [name, setName] = useState('')
   const [topScorer, setTopScorer] = useState('')
+  const [phone, setPhone] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -81,7 +83,7 @@ export default function EntryPage() {
     setSubmitting(true)
     const flat = buildPicks(picks)
     const { error: dbError } = await supabase.from('entries').insert([
-      { name: name.trim(), top_scorer: topScorer.trim(), total_goals: 0, ...flat },
+      { name: name.trim(), top_scorer: topScorer.trim(), total_goals: 0, phone: phone.trim() || null, ...flat },
     ])
 
     if (dbError) {
@@ -140,6 +142,7 @@ export default function EntryPage() {
               setPicks({})
               setName('')
               setTopScorer('')
+              setPhone('')
             }}
             className="rounded-lg border border-white/10 px-6 py-3 font-bold uppercase tracking-wider text-white/50 transition hover:border-white/30 hover:text-white"
           >
@@ -157,6 +160,10 @@ export default function EntryPage() {
           Group Stage Predictor
         </h1>
         <p className="mt-2 text-white/50">FIFA World Cup 2026 · USA, Canada &amp; Mexico</p>
+      </div>
+
+      <div className="mx-auto max-w-md">
+        <Countdown />
       </div>
 
       {/* Info panel */}
@@ -264,6 +271,19 @@ export default function EntryPage() {
                 value={topScorer}
                 onChange={(e) => setTopScorer(e.target.value)}
                 placeholder="e.g. Kylian Mbappé"
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder-white/20 outline-none transition focus:border-gold-400 focus:ring-1 focus:ring-gold-400"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-white/60">
+                Phone number
+                <span className="ml-1 text-xs text-white/30">(optional — only used to contact you if you win)</span>
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. 07700 900123"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder-white/20 outline-none transition focus:border-gold-400 focus:ring-1 focus:ring-gold-400"
               />
             </div>

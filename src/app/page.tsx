@@ -125,12 +125,27 @@ export default function EntryPage() {
             <p>If still tied, the prize is split equally.</p>
           </div>
         </div>
-        <a
-          href="/leaderboard"
-          className="inline-block rounded-lg bg-gold-400 px-6 py-3 font-bold uppercase tracking-wider text-black transition hover:bg-gold-300"
-        >
-          View Leaderboard →
-        </a>
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <a
+            href="/leaderboard"
+            className="rounded-lg bg-gold-400 px-6 py-3 font-bold uppercase tracking-wider text-black transition hover:bg-gold-300"
+          >
+            View Leaderboard →
+          </a>
+          <button
+            onClick={() => {
+              localStorage.removeItem(SUBMITTED_KEY)
+              setSubmitted(false)
+              setAlreadySubmitted(false)
+              setPicks({})
+              setName('')
+              setTopScorer('')
+            }}
+            className="rounded-lg border border-white/10 px-6 py-3 font-bold uppercase tracking-wider text-white/50 transition hover:border-white/30 hover:text-white"
+          >
+            Submit another entry
+          </button>
+        </div>
       </div>
     )
   }

@@ -42,6 +42,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               >
                 Leaderboard
               </Link>
+              <Link
+                href="/prize"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gold-400/80 transition hover:bg-white/10 hover:text-gold-400"
+              >
+                Prize Pool
+              </Link>
             </nav>
           </div>
         </header>

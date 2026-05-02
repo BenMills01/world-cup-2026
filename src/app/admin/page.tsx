@@ -14,6 +14,7 @@ interface EntryRow {
   id: string
   name: string
   paid: boolean
+  phone: string | null
   created_at: string
 }
 
@@ -81,7 +82,7 @@ export default function AdminPage() {
     setLoading(true)
     const [standingsRes, entriesRes] = await Promise.all([
       supabase.from('standings').select('*'),
-      supabase.from('entries').select('id, name, paid, created_at').order('created_at', { ascending: true }),
+      supabase.from('entries').select('id, name, paid, phone, created_at').order('created_at', { ascending: true }),
     ])
     if (standingsRes.data) {
       const s: StandingsState = {}
@@ -203,12 +204,17 @@ export default function AdminPage() {
               <div className="divide-y divide-white/5">
                 {entries.map((entry) => (
                   <div key={entry.id} className="flex items-center justify-between py-2.5">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <span className={`h-2 w-2 rounded-full shrink-0 ${entry.paid ? 'bg-green-400' : 'bg-red-500'}`} />
-                      <span className="text-sm font-medium text-white">{entry.name}</span>
-                      <span className="text-xs text-white/30">
-                        {new Date(entry.created_at).toLocaleDateString()}
-                      </span>
+                      <div className="min-w-0">
+                        <span className="text-sm font-medium text-white">{entry.name}</span>
+                        {entry.phone && (
+                          <span className="ml-2 text-xs text-white/40">{entry.phone}</span>
+                        )}
+                        <span className="ml-2 text-xs text-white/20">
+                          {new Date(entry.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                     <button
                       onClick={() => togglePaid(entry)}
